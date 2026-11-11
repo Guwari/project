@@ -1,5 +1,6 @@
 from contextlib import ExitStack
 from unittest.mock import Mock
+from cloudsentinel.scanner import Report, check_group
 
 import boto3
 import pytest
@@ -105,3 +106,46 @@ def test_scan_with_simulated_aws(scenario):
         {"operation": "GetPublicAccessBlock", "resource": f"{ACCOUNT}:s3:{BUCKET}",
          "code": "AccessDenied"}
     ] if scenario == "denied" else [])
+
+@pytest.mark.parametrize(
+    "permission,expected_rules",
+    [
+        (
+            {
+                "IpProtocol": "tcp",
+                "FromPort": 3389,
+                "ToPort": 3389,
+                "IpRanges": [{"CidrIp": "0.0.0.0/0"}],
+            },
+            {"EC2-02"},
+        ),
+        (
+            {
+                "IpProtocol": "-1",
+                "Ipv6Ranges": [{"CidrIpv6": "::/0"}],
+            },
+            {"EC2-01", "EC2-02", "EC2-03"},
+        ),
+        (
+            {
+                "IpProtocol": "tcp",
+                "FromPort": 3389,
+                "ToPort": 3389,
+                "IpRanges": [{"CidrIp": "192.0.2.10/32"}],
+            },
+            set(),
+        ),
+    ],
+)
+def test_security_group_protocol_checks(permission, expected_rules):
+    report = Report()
+
+    check_group(
+        {"GroupId": "sg-protocol-test", "IpPermissions": [permission]},
+        "demo:us-east-1",
+        report,
+    )
+
+    result = report.export("demo")
+    assert {finding["rule"] for finding in result["findings"]} == expected_rules
+    assert result["errors"] == []
