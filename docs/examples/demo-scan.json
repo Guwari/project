@@ -1,0 +1,23 @@
+{
+  "source": "demo",
+  "status": "complete",
+  "findings": [
+    {
+      "id": "0e1cb1853e3d91a0ed877c1335120ddc59f92e512dee4ffb47aaa544453317f1",
+      "rule": "EC2-01",
+      "resource": "demo:us-east-1:ec2:sg-demo",
+      "severity": "high",
+      "title": "Security group allows unrestricted SSH ingress",
+      "remediation": "Restrict SSH to approved sources or use managed session access."
+    },
+    {
+      "id": "ae117438f07110842154d42869bcd7871c093b48ab890435637efcf02dd2d9cd",
+      "rule": "S3-01",
+      "resource": "demo:s3:example-bucket",
+      "severity": "medium",
+      "title": "Bucket-level public access block is incomplete",
+      "remediation": "Enable all four bucket public access block settings."
+    }
+  ],
+  "errors": []
+}
