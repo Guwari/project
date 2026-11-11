@@ -51,13 +51,40 @@ def test_scan_with_simulated_aws(scenario):
         stubs["iam"].add_response("get_account_summary", {"SummaryMap": {
             "AccountMFAEnabled": 1, "AccountAccessKeysPresent": 0,
         }}, {})
-        stubs["ec2"].add_response("describe_security_groups", {"SecurityGroups": [
-            {"GroupId": "sg-test", "IpPermissions": [{
-                "IpProtocol": "tcp", "FromPort": 22, "ToPort": 22,
-                "IpRanges": [{"CidrIp": "0.0.0.0/0" if scenario == "exposed"
-                              else "192.0.2.10/32"}],
-            }]}
-        ]}, {})
+        ec2 = stubs["ec2"]
+        ec2.add_response(
+            "describe_security_groups",
+            {
+                "SecurityGroups": [{"GroupId": "sg-first-page", "IpPermissions": []}],
+                "NextToken": "second-page",
+            },
+            {},
+        )
+        ec2.add_response(
+            "describe_security_groups",
+            {
+                "SecurityGroups": [
+                    {
+                        "GroupId": "sg-second-page",
+                        "IpPermissions": [
+                            {
+                                "IpProtocol": "tcp",
+                                "FromPort": 22,
+                                "ToPort": 22,
+                                "IpRanges": [
+                                    {
+                                        "CidrIp": "0.0.0.0/0"
+                                        if scenario == "exposed"
+                                        else "192.0.2.10/32"
+                                    }
+                                ],
+                            }
+                        ],
+                    }
+                ]
+            },
+            {"NextToken": "second-page"},
+        )
         stubs["cloudtrail"].add_response("describe_trails", {"trailList": [
             {"TrailARN": TRAIL, "LogFileValidationEnabled": True}
         ]}, {"includeShadowTrails": True})
