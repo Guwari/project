@@ -47,3 +47,7 @@ has been validated locally. Live AWS scanning, Bedrock inference, and budget
 email delivery are pending live verification.
 
 See [the architecture and roadmap](docs/architecture.md).
+
+
+See the [threat model](docs/threat-model.md) for security boundaries,
+current controls, and remaining verification work.
