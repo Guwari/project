@@ -154,11 +154,36 @@ def scan(session, regions):
     return report.export("aws")
 
 
-def demo():
+def demo(scenario="exposed"):
+    scenarios = {"secure", "exposed", "denied"}
+    if scenario not in scenarios:
+        raise ValueError(f"Unknown demo scenario: {scenario}")
+
     report = Report()
-    check_group({"GroupId": "sg-demo", "IpPermissions": [
-        {"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22,
-         "IpRanges": [{"CidrIp": "0.0.0.0/0"}]}
-    ]}, "demo:us-east-1", report)
-    report.add("S3-01", "demo:s3:example-bucket")
+
+    if scenario == "exposed":
+        check_group(
+            {
+                "GroupId": "sg-demo",
+                "IpPermissions": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": 22,
+                        "ToPort": 22,
+                        "IpRanges": [{"CidrIp": "0.0.0.0/0"}],
+                    }
+                ],
+            },
+            "demo:us-east-1",
+            report,
+        )
+        report.add("S3-01", "demo:s3:example-bucket")
+
+    elif scenario == "denied":
+        report.errors.append({
+            "operation": "GetPublicAccessBlock",
+            "resource": "demo:s3:example-bucket",
+            "code": "AccessDenied",
+        })
+
     return report.export("demo")

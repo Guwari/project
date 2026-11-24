@@ -8,9 +8,9 @@ from .analysis import MODEL_CONFIG, analyze
 from .scanner import demo, scan
 
 
-def run(*, live=False, with_analysis=False):
+def run(*, live=False, with_analysis=False, scenario="exposed"):
     if not live:
-        return demo()
+        return demo(scenario)
 
     profile = os.environ.get("CS_SCAN_PROFILE")
     regions = tuple(dict.fromkeys(os.environ.get("CS_REGIONS", "").split(",")))
