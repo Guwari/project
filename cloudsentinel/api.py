@@ -3,6 +3,10 @@ from threading import Lock
 
 from typing import Literal
 
+from pathlib import Path
+
+from fastapi.responses import FileResponse
+
 from botocore.exceptions import BotoCoreError, ClientError
 from fastapi import FastAPI, HTTPException, Response
 
@@ -10,6 +14,13 @@ from .service import run
 
 app = FastAPI(title="CloudSentinel AI")
 scan_lock = Lock()
+
+@app.get("/", include_in_schema=False)
+def dashboard():
+    return FileResponse(
+        Path(__file__).with_name("dashboard.html"),
+        headers={"Cache-Control": "no-store"},
+    )
 
 
 @app.get("/health")

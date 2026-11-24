@@ -126,3 +126,13 @@ def test_api_rejects_live_scan_with_scenario(monkeypatch):
         "detail": "Scenarios are available only for local demos."
     }
     simulated_run.assert_not_called()
+
+def test_dashboard_route():
+    response = client.get("/")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert response.headers["cache-control"] == "no-store"
+    assert "CloudSentinel AI" in response.text
+    assert 'id="scan-form"' in response.text
+    assert 'id="scenario"' in response.text

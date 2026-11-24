@@ -16,3 +16,6 @@ cloudsentinel = "cloudsentinel.cli:main"
 
 [tool.setuptools.packages.find]
 include = ["cloudsentinel*"]
+
+[tool.setuptools.package-data]
+cloudsentinel = ["dashboard.html"]
